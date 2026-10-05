@@ -52,6 +52,30 @@ const FormularioReserva = ({ service, onClose }) => {
     }
   };
 
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  const handleImmediateCancel = async () => {
+    const confirmCancel = window.confirm('¿Estás seguro de que deseas eliminar esta reserva?');
+    if (!confirmCancel) return;
+
+    setIsCancelling(true);
+    try {
+      const response = await fetch('/api/cancelar-cita', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: successToken })
+      });
+      if (!response.ok) throw new Error('Error al cancelar');
+      alert('Reserva eliminada correctamente.');
+      setSuccessToken(null);
+      onClose();
+    } catch (err) {
+      alert('Hubo un problema al cancelar. Por favor, contacta con nosotros.');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   if (successToken) {
     const selectedServiceData = serviciosData.find(s => s.id.toString() === formData.serviceId);
     const serviceName = selectedServiceData ? selectedServiceData.name : 'Servicio';
@@ -95,6 +119,10 @@ const FormularioReserva = ({ service, onClose }) => {
             </button>
             <button onClick={onClose} className="w-full py-3 rounded-xl bg-primary text-on-primary font-bold uppercase tracking-wider hover:bg-primary-fixed transition-colors text-sm">
               Finalizar
+            </button>
+            <button onClick={handleImmediateCancel} disabled={isCancelling} className="mt-2 w-full py-2 rounded-xl text-error font-bold tracking-wider hover:bg-error/10 transition-colors text-xs flex items-center justify-center gap-1 disabled:opacity-50">
+              <span className="material-symbols-outlined text-[16px]">delete</span>
+              {isCancelling ? 'Cancelando...' : 'Me he equivocado, cancelar ahora'}
             </button>
           </div>
         </div>
