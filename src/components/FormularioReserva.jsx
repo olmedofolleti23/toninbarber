@@ -53,19 +53,50 @@ const FormularioReserva = ({ service, onClose }) => {
   };
 
   if (successToken) {
+    const selectedServiceData = serviciosData.find(s => s.id.toString() === formData.serviceId);
+    const serviceName = selectedServiceData ? selectedServiceData.name : 'Servicio';
+    
+    const textToCopy = `Cita confirmada en Tonín Barbería\nServicio: ${serviceName}\nFecha: ${formData.date}\nHora: ${formData.time}\nCódigo de cancelación: ${successToken}`;
+
+    const handleCopy = () => {
+      navigator.clipboard.writeText(textToCopy);
+      alert('¡Datos copiados al portapapeles!');
+    };
+
     return (
       <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-        <div className="bg-surface rounded-2xl w-full max-w-md p-8 shadow-xl relative text-center">
-          <span className="material-symbols-outlined text-[64px] text-green-500 mb-4">check_circle</span>
+        <div className="bg-surface rounded-2xl w-full max-w-md p-8 shadow-xl relative text-center max-h-[90vh] overflow-y-auto">
+          <span className="material-symbols-outlined text-[64px] text-green-500 mb-2">check_circle</span>
           <h2 className="text-2xl font-headline-md text-primary mb-2 uppercase">¡Cita Confirmada!</h2>
-          <p className="text-on-surface-variant mb-6">Tu reserva se ha completado con éxito.</p>
-          <div className="bg-surface-container rounded-xl p-4 mb-6">
-            <p className="text-sm text-on-surface-variant mb-2">Guarda este código por si necesitas cancelar la reserva en el futuro:</p>
-            <p className="text-2xl font-mono font-bold tracking-[0.2em] text-on-surface select-all">{successToken}</p>
+          <p className="text-on-surface-variant mb-6 text-sm">Tu reserva se ha completado con éxito. Aquí tienes los detalles:</p>
+          
+          <div className="bg-surface-container rounded-xl p-5 mb-6 text-left border border-outline-variant/30">
+            <div className="flex justify-between border-b border-outline-variant/20 pb-2 mb-2">
+              <span className="font-bold text-on-surface-variant text-sm">Servicio:</span>
+              <span className="font-medium text-on-surface text-sm">{serviceName}</span>
+            </div>
+            <div className="flex justify-between border-b border-outline-variant/20 pb-2 mb-2">
+              <span className="font-bold text-on-surface-variant text-sm">Fecha:</span>
+              <span className="font-medium text-on-surface text-sm">{formData.date}</span>
+            </div>
+            <div className="flex justify-between border-b border-outline-variant/20 pb-2 mb-4">
+              <span className="font-bold text-on-surface-variant text-sm">Hora:</span>
+              <span className="font-medium text-on-surface text-sm">{formData.time}</span>
+            </div>
+            
+            <p className="text-xs text-on-surface-variant text-center mb-1">Código de cancelación:</p>
+            <p className="text-2xl text-center font-mono font-bold tracking-[0.2em] text-primary select-all">{successToken}</p>
           </div>
-          <button onClick={onClose} className="w-full py-3 rounded-xl bg-primary text-on-primary font-bold uppercase tracking-wider hover:bg-primary-fixed transition-colors">
-            Entendido
-          </button>
+          
+          <div className="flex flex-col gap-3">
+            <button onClick={handleCopy} className="w-full py-3 rounded-xl bg-surface-container-high text-on-surface font-bold uppercase tracking-wider hover:bg-surface-container-highest transition-colors flex items-center justify-center gap-2 text-sm border border-outline-variant/50">
+              <span className="material-symbols-outlined text-[18px]">content_copy</span>
+              Copiar Datos
+            </button>
+            <button onClick={onClose} className="w-full py-3 rounded-xl bg-primary text-on-primary font-bold uppercase tracking-wider hover:bg-primary-fixed transition-colors text-sm">
+              Finalizar
+            </button>
+          </div>
         </div>
       </div>
     );
