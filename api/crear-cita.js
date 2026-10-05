@@ -50,12 +50,36 @@ export default async function handler(req, res) {
 
     const events = response.data.items || [];
     
-    // Verificamos si hay colisión de horario o si el mismo teléfono ya tiene cita
+    const dayOfWeek = startDate.getDay();
+    if (dayOfWeek === 0) return res.status(400).json({ error: 'El local está cerrado los domingos' });
+    
+    const h = startDate.getHours();
+    const m = startDate.getMinutes();
+    const totalMins = h * 60 + m;
+    
+    // Validar horario comercial
+    let isBusinessHours = false;
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      if ((totalMins >= 11 * 60 && totalMins < 14 * 60) || (totalMins >= 16 * 60 && totalMins < 21 * 60)) {
+        isBusinessHours = true;
+      }
+    } else if (dayOfWeek === 6) {
+      if (totalMins >= 10 * 60 && totalMins < 14 * 60) {
+        isBusinessHours = true;
+      }
+    }
+    
+    if (!isBusinessHours) {
+      return res.status(400).json({ error: 'Fuera de horario. Abre: L-V (11:00-14:00 / 16:00-21:00), Sáb (10:00-14:00)' });
+    }
+
+
+    let hasOverlap = false;
     for (let ev of events) {
       const evStart = new Date(ev.start.dateTime || ev.start.date);
       const evEnd = new Date(ev.end.dateTime || ev.end.date);
-
-      // Revisar si ya tiene cita ese día
+      
+      // Revisar si ya tiene cita ese día (misma persona)
       if (
         (ev.description && ev.description.includes(phone)) || 
         (ev.extendedProperties?.private?.phone === phone)
@@ -63,10 +87,14 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Ya tienes una cita reservada para este día' });
       }
 
-      // Revisar solapamiento (si el inicio propuesto es menor al fin del evento Y el fin propuesto es mayor al inicio del evento)
+      // Solapamiento
       if (startDate < evEnd && endDate > evStart) {
-        return res.status(400).json({ error: 'Ese horario ya no está disponible, por favor elige otro' });
+        hasOverlap = true;
       }
+    }
+
+    if (hasOverlap) {
+      return res.status(400).json({ error: 'Ese hueco ya está ocupado, por favor prueba a elegir otra hora.' });
     }
 
     // 2. Generar Token

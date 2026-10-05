@@ -71,6 +71,40 @@ const FormularioReserva = ({ service, onClose }) => {
     );
   }
 
+  const generateTimeOptions = () => {
+    if (!formData.date) return <option value="" disabled>Elige primero una fecha</option>;
+    const date = new Date(formData.date);
+    const day = date.getDay(); // 0 Sunday
+    if (day === 0) return <option value="" disabled>Domingos cerrado</option>;
+    
+    const slots = [];
+    const addRange = (startH, endH) => {
+      let curr = new Date(date); curr.setHours(startH, 0, 0, 0);
+      const end = new Date(date); end.setHours(endH, 0, 0, 0);
+      while (curr < end) {
+        const h = curr.getHours();
+        const m = curr.getMinutes();
+        const val = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        const label = `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+        slots.push({ val, label });
+        curr.setMinutes(curr.getMinutes() + 15);
+      }
+    };
+
+    if (day >= 1 && day <= 5) {
+      addRange(11, 14);
+      addRange(16, 21);
+    } else if (day === 6) {
+      addRange(10, 14);
+    }
+    
+    if (slots.length === 0) return <option value="" disabled>Sin horarios</option>;
+    
+    return slots.map((s, i) => <option key={i} value={s.val}>{s.label}</option>);
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-surface rounded-2xl w-full max-w-md p-6 shadow-xl relative overflow-y-auto max-h-[90vh]">
@@ -107,11 +141,14 @@ const FormularioReserva = ({ service, onClose }) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-on-surface-variant mb-1 font-bold">Fecha</label>
-              <input type="date" required className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none [color-scheme:dark]" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} />
+              <input type="date" required className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none [color-scheme:dark]" value={formData.date} onChange={(e) => { setFormData({...formData, date: e.target.value, time: ''}); }} />
             </div>
             <div>
               <label className="block text-sm text-on-surface-variant mb-1 font-bold">Hora</label>
-              <input type="time" required className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none [color-scheme:dark]" value={formData.time} onChange={(e) => setFormData({...formData, time: e.target.value})} />
+              <select required className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none appearance-none" value={formData.time} onChange={(e) => setFormData({...formData, time: e.target.value})}>
+                <option value="" disabled>--:--</option>
+                {generateTimeOptions()}
+              </select>
             </div>
           </div>
           <button type="submit" disabled={loading} className="mt-4 w-full py-3 rounded-xl bg-primary text-on-primary font-bold uppercase tracking-wider hover:bg-primary-fixed transition-colors disabled:opacity-50">
