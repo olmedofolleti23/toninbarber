@@ -2,6 +2,8 @@ import 'dotenv/config';
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
+  process.env.TZ = 'Europe/Madrid';
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
