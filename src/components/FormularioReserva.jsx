@@ -44,6 +44,17 @@ const FormularioReserva = ({ service, onClose }) => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Error al crear la cita');
+      
+      // Auto-guardado en localStorage
+      const newBooking = {
+        token: data.token,
+        date: formData.date,
+        time: formData.time,
+        serviceName: selectedServiceData.name
+      };
+      const existingBookings = JSON.parse(localStorage.getItem('tonin_bookings') || '[]');
+      localStorage.setItem('tonin_bookings', JSON.stringify([...existingBookings, newBooking]));
+
       setSuccessToken(data.token);
     } catch (err) {
       setError(err.message);
@@ -67,6 +78,12 @@ const FormularioReserva = ({ service, onClose }) => {
       });
       if (!response.ok) throw new Error('Error al cancelar');
       alert('Reserva eliminada correctamente.');
+      
+      // Limpiar de localStorage
+      const existingBookings = JSON.parse(localStorage.getItem('tonin_bookings') || '[]');
+      const filteredBookings = existingBookings.filter(b => b.token !== successToken);
+      localStorage.setItem('tonin_bookings', JSON.stringify(filteredBookings));
+
       setSuccessToken(null);
       onClose();
     } catch (err) {
