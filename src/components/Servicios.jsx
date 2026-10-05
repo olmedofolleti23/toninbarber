@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
+import FormularioReserva from './FormularioReserva';
 
-const serviciosData = [
-  { id: 1, name: 'Corte', time: '30 min • Fade & Tijera', price: '10€', category: 'cortes' },
-  { id: 2, name: 'Corte + Cejas', time: '35 min • Perfilado fino', price: '12€', category: 'cortes' },
-  { id: 3, name: 'Corte + Barba', time: '45 min • Ritual & Navaja', price: '14€', category: 'cortes' },
-  { id: 4, name: 'Mechas + Corte', time: '90 min • Combo Top', price: '29€', category: 'color' },
-  { id: 5, name: 'Mechas', time: '60 min • Tonos modernos', price: '20€', category: 'color' },
-  { id: 6, name: 'Decoloración', time: '70 min • Rubio platino / Base', price: '20€', category: 'color' }
+export const serviciosData = [
+  { id: 1, name: 'Corte', duracion: 30, time: '30 min • Fade & Tijera', price: '10€', category: 'cortes' },
+  { id: 2, name: 'Corte + Cejas', duracion: 35, time: '35 min • Perfilado fino', price: '12€', category: 'cortes' },
+  { id: 3, name: 'Corte + Barba', duracion: 45, time: '45 min • Ritual & Navaja', price: '14€', category: 'cortes' },
+  { id: 4, name: 'Mechas + Corte', duracion: 90, time: '90 min • Combo Top', price: '29€', category: 'color' },
+  { id: 5, name: 'Mechas', duracion: 60, time: '60 min • Tonos modernos', price: '20€', category: 'color' },
+  { id: 6, name: 'Decoloración', duracion: 70, time: '70 min • Rubio platino / Base', price: '20€', category: 'color' }
 ];
 
 const Servicios = () => {
   const [filter, setFilter] = useState('all');
   const [selectedService, setSelectedService] = useState(null);
+  const [isReservaOpen, setIsReservaOpen] = useState(false);
 
   const filteredServices = filter === 'all' 
     ? serviciosData 
@@ -19,8 +21,7 @@ const Servicios = () => {
 
   const handleSelectBooking = (service) => {
     setSelectedService(service);
-    const text = encodeURIComponent(`¡Hola Tonín! Me gustaría reservar cita para: ${service.name} - ${service.price}`);
-    window.open(`https://wa.me/?text=${text}`, "_blank");
+    setIsReservaOpen(true);
   };
 
   return (
@@ -85,10 +86,11 @@ const Servicios = () => {
         ))}
       </div>
       
-      {selectedService && (
-        <div className="mt-6 p-4 rounded-xl bg-surface-container-low text-center text-on-surface-variant text-sm border border-primary/20">
-          Último servicio pulsado: <span className="text-primary font-bold">{selectedService.name} ({selectedService.price})</span>
-        </div>
+      {isReservaOpen && (
+        <FormularioReserva 
+          service={selectedService} 
+          onClose={() => setIsReservaOpen(false)} 
+        />
       )}
     </section>
   );

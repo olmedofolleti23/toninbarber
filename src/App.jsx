@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Hero from './components/Hero';
 import Servicios from './components/Servicios';
 import PromoBono from './components/PromoBono';
 import Horarios from './components/Horarios';
 import Footer from './components/Footer';
 import Galeria from './components/Galeria';
+import FormularioReserva from './components/FormularioReserva';
 
 function App() {
+  const [isReservaOpen, setIsReservaOpen] = useState(false);
   return (
     <div className="bg-surface font-body-md text-on-surface min-h-screen flex flex-col">
       {/* Desktop Header (simplified for demo) */}
@@ -22,11 +24,22 @@ function App() {
             <a href="#promociones" className="hover:text-primary transition-colors">Bono Ahorro</a>
             <a href="#horarios" className="hover:text-primary transition-colors">Horarios</a>
           </div>
-          <a href="#servicios" className="hidden sm:flex py-2 px-4 rounded-xl bg-primary-container hover:bg-primary text-on-primary-fixed font-label-button text-xs font-bold uppercase transition-all shadow-[0_4px_20px_rgba(245,158,11,0.3)]">
+          <button 
+            onClick={() => setIsReservaOpen(true)}
+            className="hidden sm:flex py-2 px-4 rounded-xl bg-primary-container hover:bg-primary text-on-primary-fixed font-label-button text-xs font-bold uppercase transition-all shadow-[0_4px_20px_rgba(245,158,11,0.3)]"
+          >
             ¡Reserva tu cita!
-          </a>
+          </button>
         </div>
       </header>
+
+      {isReservaOpen && (
+        <FormularioReserva 
+          service={null}
+          onClose={() => setIsReservaOpen(false)}
+          onSuccess={() => setIsReservaOpen(false)}
+        />
+      )}
 
       <main className="flex-1 relative w-full pt-20 bg-surface">
         <Hero />
