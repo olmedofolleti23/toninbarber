@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 
 const Horarios = () => {
   return (
@@ -18,7 +18,7 @@ const Horarios = () => {
       </div>
 
       <h3 className="font-headline-xl-mobile lg:font-headline-xl text-[28px] lg:text-3xl text-on-surface uppercase tracking-wider mb-6">
-        HORARIOS DE ATENCIÃ“N
+        HORARIOS DE ATENCIÓN
       </h3>
 
       <div className="flex flex-col gap-3">
@@ -29,7 +29,7 @@ const Horarios = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-title-md text-[16px] font-bold text-on-surface">Lunes a Viernes</span>
-              <span className="font-body-sm text-[12px] text-on-surface-variant">Turno MaÃ±ana</span>
+              <span className="font-body-sm text-[12px] text-on-surface-variant">Turno Mañana</span>
             </div>
           </div>
           <span className="font-headline-sm text-xl text-primary font-bold">11:00 - 14:00</span>
@@ -54,7 +54,7 @@ const Horarios = () => {
               <span className="material-symbols-outlined text-[20px]">event_available</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-title-md text-[16px] font-bold text-on-surface">SÃ¡bados</span>
+              <span className="font-title-md text-[16px] font-bold text-on-surface">Sábados</span>
               <span className="font-body-sm text-[12px] text-on-surface-variant">Fines de semana</span>
             </div>
           </div>
