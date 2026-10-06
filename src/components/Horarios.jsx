@@ -1,8 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 
 const Horarios = () => {
   return (
-    <div className="flex flex-col bg-surface-container-low rounded-2xl lg:rounded-3xl p-6 lg:p-8 shadow-xl border border-outline-variant/30 flex-1">
+    <div id="horarios" className="flex flex-col bg-surface-container-low rounded-2xl lg:rounded-3xl p-6 lg:p-8 shadow-xl border border-outline-variant/30 flex-1">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary text-[22px]">schedule</span>
@@ -18,7 +18,7 @@ const Horarios = () => {
       </div>
 
       <h3 className="font-headline-xl-mobile lg:font-headline-xl text-[28px] lg:text-3xl text-on-surface uppercase tracking-wider mb-6">
-        HORARIOS DE ATENCIÓN
+        HORARIOS DE ATENCIÃ“N
       </h3>
 
       <div className="flex flex-col gap-3">
@@ -29,7 +29,7 @@ const Horarios = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-title-md text-[16px] font-bold text-on-surface">Lunes a Viernes</span>
-              <span className="font-body-sm text-[12px] text-on-surface-variant">Turno Mañana</span>
+              <span className="font-body-sm text-[12px] text-on-surface-variant">Turno MaÃ±ana</span>
             </div>
           </div>
           <span className="font-headline-sm text-xl text-primary font-bold">11:00 - 14:00</span>
@@ -54,7 +54,7 @@ const Horarios = () => {
               <span className="material-symbols-outlined text-[20px]">event_available</span>
             </div>
             <div className="flex flex-col">
-              <span className="font-title-md text-[16px] font-bold text-on-surface">Sábados</span>
+              <span className="font-title-md text-[16px] font-bold text-on-surface">SÃ¡bados</span>
               <span className="font-body-sm text-[12px] text-on-surface-variant">Fines de semana</span>
             </div>
           </div>
@@ -66,3 +66,4 @@ const Horarios = () => {
 };
 
 export default Horarios;
+

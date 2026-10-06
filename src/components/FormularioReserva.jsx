@@ -7,11 +7,12 @@ const FormularioReserva = ({ service, onClose }) => {
     phone: '',
     date: '',
     time: '',
-    serviceId: service ? service.id.toString() : ''
+    serviceId: service ? service.id.toString() : '',
+    pin: localStorage.getItem('tonin_pin') || ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [successToken, setSuccessToken] = useState(null);
+  const [successEventId, setSuccessEventId] = useState(null);
 
   useEffect(() => {
     if (service) {
@@ -29,6 +30,14 @@ const FormularioReserva = ({ service, onClose }) => {
       setLoading(false);
       return;
     }
+    
+    if (!formData.phone || formData.phone.length < 9) {
+      setError('El número de teléfono es obligatorio y debe ser válido');
+      setLoading(false);
+      return;
+    }
+
+
 
     const selectedServiceData = serviciosData.find(s => s.id.toString() === formData.serviceId);
 
@@ -39,23 +48,45 @@ const FormularioReserva = ({ service, onClose }) => {
         body: JSON.stringify({ 
           ...formData, 
           serviceName: selectedServiceData.name,
+          pin: formData.pin,
           duracion: selectedServiceData.duracion
         })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Error al crear la cita');
       
-      // Auto-guardado en localStorage
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error('Error interno del servidor. Respuesta: ' + text.substring(0, 50));
+      }
+
+      if (!response.ok) {
+        if (data.stack) {
+          console.error('Error detallado del Backend:', data.error);
+          console.error('Stack Trace:', data.stack);
+        }
+        throw new Error(data.error || 'Error al crear la cita');
+      }
+      
+      // Auto-guardado en localStorage (Para auto-cancelar)
       const newBooking = {
-        token: data.token,
+        token: data.eventId,
         date: formData.date,
         time: formData.time,
         serviceName: selectedServiceData.name
       };
-      const existingBookings = JSON.parse(localStorage.getItem('tonin_bookings') || '[]');
+      
+      let existingBookings = [];
+      try {
+        existingBookings = JSON.parse(localStorage.getItem('tonin_bookings') || '[]');
+      } catch(e) {}
+
       localStorage.setItem('tonin_bookings', JSON.stringify([...existingBookings, newBooking]));
 
-      setSuccessToken(data.token);
+      localStorage.setItem('tonin_pin', formData.pin);
+
+      setSuccessEventId(data.eventId);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -74,17 +105,14 @@ const FormularioReserva = ({ service, onClose }) => {
       const response = await fetch('/api/cancelar-cita', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: successToken })
+        body: JSON.stringify({ eventId: successEventId, phone: formData.phone, pin: formData.pin })
       });
       if (!response.ok) throw new Error('Error al cancelar');
       alert('Reserva eliminada correctamente.');
       
-      // Limpiar de localStorage
-      const existingBookings = JSON.parse(localStorage.getItem('tonin_bookings') || '[]');
-      const filteredBookings = existingBookings.filter(b => b.token !== successToken);
-      localStorage.setItem('tonin_bookings', JSON.stringify(filteredBookings));
 
-      setSuccessToken(null);
+
+      setSuccessEventId(null);
       onClose();
     } catch (err) {
       alert('Hubo un problema al cancelar. Por favor, contacta con nosotros.');
@@ -93,11 +121,11 @@ const FormularioReserva = ({ service, onClose }) => {
     }
   };
 
-  if (successToken) {
+  if (successEventId) {
     const selectedServiceData = serviciosData.find(s => s.id.toString() === formData.serviceId);
     const serviceName = selectedServiceData ? selectedServiceData.name : 'Servicio';
     
-    const textToCopy = `Cita confirmada en Tonín Barbería\nServicio: ${serviceName}\nFecha: ${formData.date}\nHora: ${formData.time}\nCódigo de cancelación: ${successToken}`;
+    const textToCopy = `Cita confirmada en Tonín Barbería\nServicio: ${serviceName}\nFecha: ${formData.date}\nHora: ${formData.time}\n`;
 
     const handleCopy = () => {
       navigator.clipboard.writeText(textToCopy);
@@ -125,8 +153,7 @@ const FormularioReserva = ({ service, onClose }) => {
               <span className="font-medium text-on-surface text-sm">{formData.time}</span>
             </div>
             
-            <p className="text-xs text-on-surface-variant text-center mb-1">Código de cancelación:</p>
-            <p className="text-2xl text-center font-mono font-bold tracking-[0.2em] text-primary select-all">{successToken}</p>
+            <p className="text-xs text-on-surface-variant text-center mb-1">Puedes gestionar y cancelar tus citas desde la sección 'Mis Citas' usando tu teléfono móvil y PIN.</p>
           </div>
           
           <div className="flex flex-col gap-3">
@@ -210,9 +237,15 @@ const FormularioReserva = ({ service, onClose }) => {
             <label className="block text-sm text-on-surface-variant mb-1 font-bold">Nombre</label>
             <input type="text" required className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} />
           </div>
-          <div>
-            <label className="block text-sm text-on-surface-variant mb-1 font-bold">Teléfono</label>
-            <input type="tel" required className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-on-surface-variant mb-1 font-bold">Teléfono</label>
+              <input type="tel" required className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} />
+            </div>
+            <div>
+              <label className="block text-sm text-on-surface-variant mb-1 font-bold">PIN Seguridad</label>
+              <input type="password" required pattern="[0-9]{4,6}" placeholder="Ej: 1234" maxLength="6" className="w-full bg-surface-container border border-outline-variant/30 rounded-xl px-4 py-2 text-on-surface focus:border-primary outline-none tracking-widest" value={formData.pin} onChange={(e) => setFormData({...formData, pin: e.target.value})} />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>

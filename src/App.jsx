@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import Hero from './components/Hero';
 import Servicios from './components/Servicios';
 import PromoBono from './components/PromoBono';
@@ -6,12 +6,14 @@ import Horarios from './components/Horarios';
 import Footer from './components/Footer';
 import Galeria from './components/Galeria';
 import FormularioReserva from './components/FormularioReserva';
+import MisCitas from './components/MisCitas';
 
 function App() {
   const [isReservaOpen, setIsReservaOpen] = useState(false);
+  const [isMisCitasOpen, setIsMisCitasOpen] = useState(false);
+  
   return (
     <div className="bg-surface font-body-md text-on-surface min-h-screen flex flex-col">
-      {/* Desktop Header (simplified for demo) */}
       <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
         <div className="max-w-7xl mx-auto h-16 lg:h-20 px-4 lg:px-6 flex items-center justify-between">
           <div className="flex items-center gap-2 lg:gap-3">
@@ -24,12 +26,20 @@ function App() {
             <a href="#promociones" className="hover:text-primary transition-colors">Bono Ahorro</a>
             <a href="#horarios" className="hover:text-primary transition-colors">Horarios</a>
           </div>
-          <button 
-            onClick={() => setIsReservaOpen(true)}
-            className="hidden sm:flex py-2 px-4 rounded-xl bg-primary-container hover:bg-primary text-on-primary-fixed font-label-button text-xs font-bold uppercase transition-all shadow-[0_4px_20px_rgba(245,158,11,0.3)]"
-          >
-            ¡Reserva tu cita!
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setIsMisCitasOpen(true)}
+              className="hidden sm:flex py-2 px-4 rounded-xl bg-surface-container hover:bg-surface-container-highest text-on-surface font-label-button text-xs font-bold uppercase transition-all border border-outline-variant/30"
+            >
+              Mis Citas
+            </button>
+            <button 
+              onClick={() => setIsReservaOpen(true)}
+              className="py-2 px-4 rounded-xl bg-primary-container hover:bg-primary text-on-primary-fixed font-label-button text-xs font-bold uppercase transition-all shadow-[0_4px_20px_rgba(245,158,11,0.3)]"
+            >
+              ¡Reserva!
+            </button>
+          </div>
         </div>
       </header>
 
@@ -37,8 +47,11 @@ function App() {
         <FormularioReserva 
           service={null}
           onClose={() => setIsReservaOpen(false)}
-          onSuccess={() => setIsReservaOpen(false)}
         />
+      )}
+
+      {isMisCitasOpen && (
+        <MisCitas onClose={() => setIsMisCitasOpen(false)} />
       )}
 
       <main className="flex-1 relative w-full pt-20 bg-surface">
@@ -59,6 +72,14 @@ function App() {
 
         <Footer />
       </main>
+      
+      {/* Mobile Floating Button for Mis Citas */}
+      <button 
+        onClick={() => setIsMisCitasOpen(true)}
+        className="sm:hidden fixed bottom-6 left-6 z-40 w-14 h-14 rounded-full bg-surface-container-high text-primary flex items-center justify-center shadow-lg border border-outline-variant/30"
+      >
+        <span className="material-symbols-outlined">calendar_month</span>
+      </button>
     </div>
   );
 }
